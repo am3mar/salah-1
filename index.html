@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة مواقيت الصلاة - جراتس & جلاسكو</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            500: '#0284c7',
+                            900: '#0c4a6e',
+                            gold: '#f59e0b',
+                            accent: '#10b981'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Tajawal', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #090d16;
+            color: #f1f5f9;
+        }
+        .main-card {
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.8));
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 40px -15px rgba(0,0,0,0.5);
+        }
+        .active-city-tab {
+            background: #0284c7;
+            color: #ffffff;
+            box-shadow: 0 0 15px rgba(2, 132, 199, 0.4);
+        }
+        .prayer-row {
+            transition: all 0.2s ease;
+        }
+        .prayer-row:hover {
+            background: rgba(255, 255, 255, 0.04);
+        }
+        .prayer-active {
+            background: linear-gradient(90deg, rgba(245, 158, 11, 0.15), transparent);
+            border-right: 4px solid #f59e0b;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-4 md:p-8">
+
+    <!-- Top Navigation Header -->
+    <header class="max-w-6xl mx-auto w-full flex flex-col md:flex-row justify-between items-center gap-4 mb-8 border-b border-slate-800/80 pb-4">
+        <div>
+            <h1 class="text-2xl font-black tracking-tight text-white flex items-center gap-2">
+                <i class="fa-solid fa-compass text-brand-gold"></i>
+                مواقيت الصلاة العالمية
+            </h1>
+            <p class="text-xs text-slate-400 mt-1">عرض دقيق ومباشر لمدينتي جراتس (النمسا) وجلاسكو (اسكتلندا)</p>
+        </div>
+
+        <!-- City Switcher Tabs -->
+        <div class="bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800 flex gap-2">
+            <button onclick="switchCity('graz')" id="tab-graz" class="active-city-tab text-xs font-bold px-5 py-2.5 rounded-xl transition-all flex items-center gap-2">
+                🇦🇹 جراتس (Graz)
+            </button>
+            <button onclick="switchCity('glasgow')" id="tab-glasgow" class="text-slate-400 hover:text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all flex items-center gap-2">
+                🏴󠁧󠁢󠁳󠁣󠁴󠁿 جلاسكو (Glasgow)
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="max-w-6xl mx-auto w-full space-y-8">
+
+        <!-- 1. HERO SECTION: Dynamic City Details & Countdown -->
+        <div class="main-card rounded-3xl p-6 md:p-8 relative overflow-hidden">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
+                <div>
+                    <div class="flex items-center gap-2 text-brand-gold text-xs font-bold uppercase tracking-wider mb-2">
+                        <i class="fa-solid fa-location-dot"></i> <span id="city-title">جراتس، النمسا</span>
+                    </div>
+                    <h2 class="text-3xl md:text-5xl font-black text-white" id="next-prayer-title">--</h2>
+                    <p class="text-sm text-slate-400 mt-2" id="hijri-gregorian-date">جاري التحميل...</p>
+                </div>
+
+                <!-- Big Countdown Box -->
+                <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 md:p-6 text-center min-w-[240px]">
+                    <span class="text-xs text-slate-400 font-medium block mb-1">الوقت المتبقي للأذان</span>
+                    <div class="text-3xl md:text-4xl font-black text-brand-gold font-mono dir-ltr" id="countdown-timer">
+                        00:00:00
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. DAILY DUA SECTION (Auto-Rotates Every Day) -->
+        <div class="main-card rounded-2xl p-6 border-r-4 border-r-emerald-500 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div class="space-y-1">
+                <div class="flex items-center gap-2 text-emerald-400 text-xs font-bold">
+                    <i class="fa-solid fa-sparkles"></i> دعاء اليوم المتجدد
+                </div>
+                <p class="text-base text-slate-200 font-medium leading-relaxed" id="daily-dua-text">
+                    "جاري تحميل دعاء اليوم..."
+                </p>
+                <span class="text-[11px] text-slate-500 block" id="daily-dua-source">--</span>
+            </div>
+            <button onclick="copyDua()" class="shrink-0 text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-4 py-2.5 rounded-xl transition flex items-center gap-2">
+                <i class="fa-solid fa-copy"></i> نسخ الدعاء
+            </button>
+        </div>
+
+        <!-- 3. PRAYER TIMES TABLE (GRAZ vs GLASGOW) -->
+        <div class="main-card rounded-3xl p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-clock text-brand-500"></i> جدول أوقات الصلاة اليومية
+                </h3>
+                <span class="text-xs bg-slate-800 text-slate-400 px-3 py-1 rounded-full border border-slate-700" id="current-timezone">
+                    التوقيت المحلي
+                </span>
+            </div>
+
+            <!-- Prayer List -->
+            <div class="divide-y divide-slate-800/60" id="prayer-list">
+                <!-- Rows injected via JavaScript -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="max-w-6xl mx-auto w-full text-center text-xs text-slate-600 border-t border-slate-800/80 pt-6 mt-12">
+        مواقيت الصلاة الدقيقة لمدينة جراتس (النمسا) وجلاسكو (اسكتلندا) | متجدد تلقائياً
+    </footer>
+
+    <!-- JavaScript Engine -->
+    <script>
+        // City Coordinates
+        const CITIES = {
+            graz: {
+                name: "جراتس، النمسا (Graz)",
+                lat: 47.0707,
+                lng: 15.4395,
+                method: 3 // Europe Method
+            },
+            glasgow: {
+                name: "جلاسكو، اسكتلندا (Glasgow)",
+                lat: 55.8642,
+                lng: -4.2518,
+                method: 3 // Europe / UK Method
+            }
+        };
+
+        // Rotating Daily Duas Data Array
+        const DAILY_DUAS = [
+            { text: "اللَّهُمَّ أَعِنِّي عَلَى ذِكْرِكَ وَشُكْرِكَ وَحُسْنِ عِبَادَتِكَ", source: "حديث صحيح - رواه أبو داود" },
+            { text: "رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ", source: "سورة البقرة - آية 201" },
+            { text: "اللَّهُمَّ إِنِّي أَسْأَلُكَ الْهُدَى وَالتُّقَى وَالْعَفَافَ وَالْغِنَى", source: "حديث صحيح - رواه مسلم" },
+            { text: "رَبِّ اشْرَحْ لِي صَدْرِي وَيَسِّرْ لِي أَمْرِي", source: "سورة طه - آية 25" },
+            { text: "اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَهَ إِلَّا أَنْتَ، خَلَقْتَنِي وَأَنَا عَبْدُكَ، وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ", source: "سيد الاستغفار - رواه البخاري" },
+            { text: "اللَّهُمَّ إِنِّي أَسْأَلُكَ عِلْمًا نَافِعًا، وَرِزْقًا طَيِّبًا، وَعَمَلًا مُتَقَبَّلًا", source: "حديث صحيح - ابن ماجه" },
+            { text: "يَا مُقَلِّبَ الْقُلُوبِ ثَبِّتْ قَلْبِي عَلَى دِينِكَ", source: "حديث صحيح - الترمذي" }
+        ];
+
+        let activeCityKey = 'graz';
+        let prayerTimes = null;
+        let timerInterval = null;
+
+        // Initialize App
+        function initApp() {
+            setDailyDua();
+            loadCityData(activeCityKey);
+        }
+
+        // Auto Select Dua based on Day of the Year
+        function setDailyDua() {
+            const now = new Date();
+            const start = new Date(now.getFullYear(), 0, 0);
+            const diff = now - start;
+            const oneDay = 1000 * 60 * 60 * 24;
+            const dayOfYear = Math.floor(diff / oneDay);
+            
+            const selectedDua = DAILY_DUAS[dayOfYear % DAILY_DUAS.length];
+            document.getElementById('daily-dua-text').innerText = `"${selectedDua.text}"`;
+            document.getElementById('daily-dua-source').innerText = `المصدر: ${selectedDua.source}`;
+        }
+
+        // Copy Dua Function
+        function copyDua() {
+            const text = document.getElementById('daily-dua-text').innerText;
+            navigator.clipboard.writeText(text);
+            alert('تم نسخ الدعاء بنجاح.');
+        }
+
+        // Switch Active City
+        function switchCity(cityKey) {
+            activeCityKey = cityKey;
+            
+            // Toggle Tab Styles
+            document.getElementById('tab-graz').className = cityKey === 'graz' ? 'active-city-tab text-xs font-bold px-5 py-2.5 rounded-xl transition-all flex items-center gap-2' : 'text-slate-400 hover:text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all flex items-center gap-2';
+            document.getElementById('tab-glasgow').className = cityKey === 'glasgow' ? 'active-city-tab text-xs font-bold px-5 py-2.5 rounded-xl transition-all flex items-center gap-2' : 'text-slate-400 hover:text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all flex items-center gap-2';
+            
+            loadCityData(cityKey);
+        }
+
+        // Fetch Prayer Data from API
+        async function loadCityData(cityKey) {
+            const city = CITIES[cityKey];
+            document.getElementById('city-title').innerText = city.name;
+
+            try {
+                const response = await fetch(`https://api.aladhan.com/v1/timings?latitude=${city.lat}&longitude=${city.lng}&method=${city.method}`);
+                const result = await response.json();
+
+                if (result.code === 200) {
+                    prayerTimes = result.data.timings;
+                    const date = result.data.date;
+                    
+                    document.getElementById('hijri-gregorian-date').innerText = `${date.hijri.day} ${date.hijri.month.ar} ${date.hijri.year} هـ  |  ${date.readable}`;
+                    document.getElementById('current-timezone').innerText = `التوقيت: ${result.data.meta.timezone}`;
+
+                    renderPrayerList();
+                    startTimer();
+                }
+            } catch (err) {
+                console.error("Error fetching data:", err);
+            }
+        }
+
+        // Render Prayer Table
+        function renderPrayerList() {
+            const container = document.getElementById('prayer-list');
+            container.innerHTML = '';
+
+            const list = [
+                { key: 'Fajr', name: 'الفجر', icon: 'fa-cloud-moon' },
+                { key: 'Sunrise', name: 'الشروق', icon: 'fa-sun-plant-wilt' },
+                { key: 'Dhuhr', name: 'الظهر', icon: 'fa-sun' },
+                { key: 'Asr', name: 'العصر', icon: 'fa-cloud-sun' },
+                { key: 'Maghrib', name: 'المغرب', icon: 'fa-moon-cloud' },
+                { key: 'Isha', name: 'العشاء', icon: 'fa-moon' }
+            ];
+
+            list.forEach(item => {
+                const row = document.createElement('div');
+                row.id = `row-${item.key}`;
+                row.className = 'prayer-row py-4 px-3 flex justify-between items-center rounded-xl font-medium';
+                row.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid ${item.icon} text-slate-500 w-6"></i>
+                        <span class="text-sm text-slate-200">${item.name}</span>
+                    </div>
+                    <div class="text-lg font-bold font-mono text-white">${prayerTimes[item.key]}</div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        // Countdown Timer Engine
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+
+            const prayerKeys = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+            const namesAr = { Fajr: 'صلاة الفجر', Dhuhr: 'صلاة الظهر', Asr: 'صلاة العصر', Maghrib: 'صلاة المغرب', Isha: 'صلاة العشاء' };
+
+            timerInterval = setInterval(() => {
+                const now = new Date();
+                let nextTime = null;
+                let nextName = '';
+                let activeKey = '';
+
+                for (let k of prayerKeys) {
+                    const [h, m] = prayerTimes[k].split(':');
+                    const pDate = new Date();
+                    pDate.setHours(parseInt(h), parseInt(m), 0, 0);
+
+                    if (pDate > now) {
+                        nextTime = pDate;
+                        nextName = namesAr[k];
+                        activeKey = k;
+                        break;
+                    }
+                }
+
+                if (!nextTime) {
+                    const [h, m] = prayerTimes['Fajr'].split(':');
+                    nextTime = new Date();
+                    nextTime.setDate(nextTime.getDate() + 1);
+                    nextTime.setHours(parseInt(h), parseInt(m), 0, 0);
+                    nextName = namesAr['Fajr'];
+                    activeKey = 'Fajr';
+                }
+
+                // Highlight Row
+                document.querySelectorAll('.prayer-row').forEach(el => el.classList.remove('prayer-active'));
+                const activeRow = document.getElementById(`row-${activeKey}`);
+                if (activeRow) activeRow.classList.add('prayer-active');
+
+                // Time Difference Calculation
+                const diff = nextTime - now;
+                const hrs = Math.floor(diff / (1000 * 60 * 60));
+                const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+                document.getElementById('next-prayer-title').innerText = nextName;
+                document.getElementById('countdown-timer').innerText = 
+                    `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+
+            }, 1000);
+        }
+
+        // Start Application
+        initApp();
+    </script>
+</body>
+</html>
